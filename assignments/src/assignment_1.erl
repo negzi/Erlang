@@ -7,11 +7,14 @@ math(List) ->
     Evens = return_evens(List),
     {lists:sum(Odds), prod(Evens)}.
 
+
 return_odds(List) ->
     [Odd || Odd <-List, Odd rem 2 =/= 0].
 
+
 return_evens(List) ->
-    [Evens || Evens <-List, Evens rem 2 =:= 0].
+	[Evens || Evens <-List, Evens rem 2 =:= 0].
+
 
 prod([]) -> 0;
 prod([Head]) -> Head;
@@ -19,4 +22,10 @@ prod([Head|T]) -> Head * prod(T).
 
 
 palindrome(List) ->
-    [Palin || Palin <-List, erlang:is_list(Palin) =:= true , Palin =:= lists:reverse(Palin) ].
+    try
+	[Palin || Palin <-List, 
+		  Palin =:= lists:reverse(Palin) ]
+    catch
+	Exception:Reason ->
+	     {"Wrong input,only string is allowed ", Exception, Reason}
+   end.
