@@ -1,31 +1,46 @@
 -module(assignment_1).
--export([math/1, return_odds/1, return_evens/1,  prod/1, palindrome/1]).
+-export([math/1,  palindrome/1]).
 
-
+math(List) when is_list(List) ->
+     case all_integer(List) of 
+ 	true ->
+ 	    reutn_odd_even(List);
+ 	false ->
+ 	    {error, "wrong input"}
+     end;
 math(List) ->
-    Odds = return_odds(List),
-    Evens = return_evens(List),
-    {lists:sum(Odds), prod(Evens)}.
+    {error, "input has to be list"}.     
 
 
-return_odds(List) ->
-    [Odd || Odd <-List, Odd rem 2 =/= 0].
+all_integer(List) ->
+    lists:all(fun(X) -> is_integer(X) end,List).
 
+reutn_odd_even(List) ->
+    {Odds, Evens} = lists:partition(fun(X) -> X rem 2 =:= 1 end, 
+				    List),
+    {sum(Odds), product(Evens)}.
 
-return_evens(List) ->
-	[Evens || Evens <-List, Evens rem 2 =:= 0].
+sum(Odds) ->
+    lists:sum(Odds).
 
-
-prod([]) -> 0;
-prod([Head]) -> Head;
-prod([Head|T]) -> Head * prod(T).
+product(Evens) ->
+    lists:foldl(fun(X, Acc) -> Acc*X end,
+		1,
+		Evens).
 
 
 palindrome(List) ->
-    try
-	[Palin || Palin <-List, 
-		  Palin =:= lists:reverse(Palin) ]
-    catch
-	Exception:Reason ->
-	     {"Wrong input,only string is allowed ", Exception, Reason}
-   end.
+    palindrome(List, []).
+
+palindrome([], Acc) ->
+    lists:reverse(Acc);
+palindrome([H|T], Acc) when is_list(H) ->
+    case lists:reverse(H) =:= H of
+	true ->
+	    palindrome(T, [H|Acc]);
+	false ->
+	    palindrome(T, Acc)
+    end;
+palindrome(_,_) ->
+    {error, "wrong input"}.
+

@@ -1,3 +1,4 @@
+
 -module(assignment_1_tests).
 -include_lib("eunit/include/eunit.hrl").
 
@@ -6,35 +7,12 @@ math_test() ->
 
 
 math_list_of_different_types_test() ->
-    ?assertEqual({1, 0}, assignment_1:math([1, {2}, "b", a])).
+    ?assertEqual({error, "wrong input"}, assignment_1:math([1, {2}, "b", a])).
 
 
-resturn_odds_test() ->
-    ?assertEqual([1, 3], assignment_1:return_odds([1, 2, 3, 4])).
-
-
-return_odds_with_other_types_test() ->
-    ?assertEqual([1, 3], assignment_1:return_odds([1, 2, 3, 4, a])).
-
-
-return_evens_test() ->
-    ?assertEqual([2, 4], assignment_1:return_evens([1, 2, 3, 4])).
-
-
-product_test() ->
-    ?assertEqual(24, assignment_1:prod([1, 2, 3, 4])).
-
-
-product_empty_list_test() ->
-    ?assertEqual(0, assignment_1:prod([])).
-
-
-product_single_list_test() ->
-    ?assertEqual(2, assignment_1:prod([2])).
-
-
-product_list_with_ziro_test() ->
-    ?assertEqual(0, assignment_1:prod([2, 0, 1, 3])).
+math_different_types_test() ->
+    ?assertEqual({error, "input has to be list"},
+		  assignment_1:math({2})).
 
 
 palindrome_empty_string_test() ->
@@ -46,16 +24,16 @@ palindrome_one_string_test() ->
 
 
 palindrome_mixed_strings_test() ->
-    ?assertEqual(["a", "abba", "level", "dad dad"], assignment_1:palindrome(["a", "abba", "neg", "level", "dad dad"])).
+    ?assertEqual(["a", "abba", "level", "dad dad"], 
+		 assignment_1:palindrome(["a", "abba",
+					  "neg", "level", "dad dad"])).
 
 
-palindrome_other_types__test() ->
-    ?assertEqual({"Wrong input,only string is allowed ",
-		  error, function_clause},
-		 assignment_1:palindrome(["a", 1, abba, {abba}])).
+palindrome_other_types_test() ->
+    ?assertEqual({error, "wrong input"},
+		 assignment_1:palindrome(a)).
 
-    
+
 no_palindrome_with_other_types_test() ->
-    ?assertEqual( {"Wrong input,only string is allowed ", 
-		   error, function_clause},
+    ?assertEqual( {error, "wrong input"},
 		  assignment_1:palindrome([1, abba, {abba}])).
