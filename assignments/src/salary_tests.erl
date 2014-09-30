@@ -18,3 +18,32 @@ assign_employee_info_test() ->
     ?assertEqual(#employee{no = 1,name = albert, 
 			   salary=21161, level=4, basesalary=15000, performance=bad},
 		 salary:fill_employee_info(1, albert, 21161,4, 15000, bad)).
+
+record_all_employee_test() ->
+    ?assertEqual([ #employee{no = "2",name = "albert",salary = "21161",
+			    level = "4",basesalary = "15000",performance = "Bad"},
+		  #employee{no = "3",name = "becka",salary = "21161",
+			    level = "4",basesalary = "15000",performance = "Good"},
+		  #employee{no = "4",name = "emilio",salary = "21562",
+			    level = "6",basesalary = "25000",performance = "Excellent"}],
+		salary:record_of_all_employees("/home/enegfaz/employee_info")).
+
+performance_to_num_test() ->
+    ?assertEqual(3, salary:performance_map_to_number("Excellent")).
+
+compare_performance_test() ->
+    A = #employee{no = "2",name = "albert",salary = "21161",
+	      level = "4",basesalary = "15000",performance = "Bad"},
+    B = #employee{no = "4",name = "emilio",salary = "21562",
+		  level = "6",basesalary = "25000",performance = "Excellent"},
+    ?assertEqual(false, salary:compare_performance(A, B)).
+
+
+%% sorted_employees_test() ->
+%%     ?assertEqual([ #employee{no = "4",name = "emilio",salary = "21562",
+%% 			     level = "6",basesalary = "25000",performance = "Excellent"},
+%% 		   #employee{no = "3",name = "becka",salary = "21161",
+%% 			     level = "4",basesalary = "15000",performance = "Good"},
+%% 		   #employee{no = "2",name = "albert",salary = "21161",
+%% 			     level = "4",basesalary = "15000",performance = "Bad"}],
+%% 		 salary:sort_employees("/home/enegfaz/employee_info")).
