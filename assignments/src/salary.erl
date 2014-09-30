@@ -8,17 +8,26 @@
                   basesalary,
                   performance}).
 
-
-read_lines(FileName) ->
-    case file:read_file(FileName) of
+read_lines(FileName) ->    
+    case file:open(FileName, [read]) of
 	{ok, Data} ->
-	   binary:split(Data, [<<"\n">>], [global]);
+	    Lines = get_lines(Data, []),
+	    Strip_List = [string:strip(X, right, $\n) || X <- Lines],
+	    [string:tokens(X, "! ") || X <- Strip_List];
 	{error,Reason} ->
 	    {error,Reason}
     end.
 
+get_lines(Data, Acc) ->    
+    case io:get_line(Data, "") of
+        eof  ->
+	    file:close(Data),
+	    Acc;
+	Line ->
+	    get_lines(Data, Acc ++ [Line])
+    end.	      
 
-		
+	
 fill_employee_info(No, Name, Salary, Level, Basesalary, Performance) ->
     #employee{no=No, name=Name, salary=Salary, 
 	      level=Level, basesalary=Basesalary, 
