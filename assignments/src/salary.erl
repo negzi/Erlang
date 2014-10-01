@@ -1,7 +1,7 @@
 -module(salary).
 -export([read_lines/1, fill_employee_info/6,
-	 record_of_all_employees/1, performance_map_to_number/1,
-	 compare_performance/2]).
+	 record_of_all_employees/1, map/1,
+	 compare_performance/2, sort_employees/1]).
 
 -record(employee, {no,
                   name,
@@ -11,11 +11,14 @@
                   performance}).
 
 
-%% sort_employees(File) ->
-%%     Employees = record_of_all_employees(File),
-%%     F = fun(X, Y) -> {compare_performance(X#employee.performance)} > 
-%% 			 compare_performance({Y#employee.performance}) end,
-%%     lists:sort(F ,  Employees).
+sort_employees(File) ->
+    Employees = record_of_all_employees(File),
+%    io:format("~p~n",
+    	      lists:sort(
+    		 fun(A, B) -> map(A#employee.performance) >  map(B#employee.performance) end,
+		 Employees).
+   % [lists:sort(fun(X, Y) -> X#employee.performance >  Y#employee.performance end, Employees) || X <- Employees, Y <- Employees].
+
 
 calculate_compa_ratio(A, B) ->
     A_compa_ratio = (A#employee.salary * 100) / A#employee.basesalary,
@@ -26,7 +29,7 @@ calculate_compa_ratio(A, B) ->
 compare_performance(A, B) ->
     A#employee.performance >  B#employee.performance.
     
-performance_map_to_number(Performance) ->
+map(Performance) ->
     case Performance of
     	"Excellent" ->
     	    3;
@@ -39,7 +42,7 @@ performance_map_to_number(Performance) ->
 
 record_of_all_employees(FileName) ->
     Lines = lists:nthtail(1, read_lines(FileName)),
-    [salary:fill_employee_info(No, Name, Salary, Level,
+    [fill_employee_info(No, Name, Salary, Level,
 			       Basesalary, Performance) || [No, Name, Salary, Level, 
 							    Basesalary, Performance]
 							       <-Lines].
