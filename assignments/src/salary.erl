@@ -13,11 +13,10 @@
 
 sort_employees(File) ->
     Employees = record_of_all_employees(File),
-%    io:format("~p~n",
+
     	      lists:sort(
     		 fun(A, B) -> map(A#employee.performance) >  map(B#employee.performance) end,
 		 Employees).
-   % [lists:sort(fun(X, Y) -> X#employee.performance >  Y#employee.performance end, Employees) || X <- Employees, Y <- Employees].
 
 
 calculate_compa_ratio(A, B) ->
