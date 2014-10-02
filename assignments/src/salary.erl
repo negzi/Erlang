@@ -1,7 +1,7 @@
 -module(salary).
--export([read_lines/1, fill_employee_info/6,
-	 record_of_all_employees/1, map/1,
-	 compare_performance/2, sort_employees/1]).
+-export([read_lines/1, fill_employee_info/6,sorted_list/1,write_to_file/2,
+	 record_of_all_employees/1, map/1,sort_employees/1,record_value/1,
+	 compare_performance/2, sort_employees/1, calculate_compa_ratio/2]).
 
 -record(employee, {no,
                   name,
@@ -10,23 +10,51 @@
                   basesalary,
                   performance}).
 
+sorted_list(File) ->    
+    Sorted_records = sort_employees(File),
+    List = [record_value(Rec) || Rec <- Sorted_records],
+    
+    file:write_file("Sorted_Employees", List).
+%    [write_to_file("Sorted_Employees", L) || L <-List].
+%    write_to_file("Sorted_Employees", List).
+
+write_to_file(New_File, List) ->
+    file:write_file(New_File, io_lib
+		    :fwrite("~s ~s ~s ~s ~s ~s ~n", List)).
 
 sort_employees(File) ->
     Employees = record_of_all_employees(File),
-
     lists:sort(
-      fun(A, B) -> map(A#employee.performance) >  map(B#employee.performance) end,
+      fun(A, B) ->	      
+	      case equal_performance(A, B) of
+		  true ->
+		      
+		      calculate_compa_ratio(A, B);
+		  false ->    
+		      compare_performance(A, B)
+	      end
+      end,
       Employees).
 
+record_value(Rec) ->    
+    [Rec#employee.no, Rec#employee.name, Rec#employee.salary,
+     Rec#employee.level, Rec#employee.basesalary, Rec#employee.performance].
 
 calculate_compa_ratio(A, B) ->
-    A_compa_ratio = (A#employee.salary * 100) / A#employee.basesalary,
-    B_compa_ratio = (B#employee.salary * 100) / B#employee.basesalary,
-    A_compa_ratio > B_compa_ratio.
+    A_salary = list_to_integer(A#employee.salary),
+    A_base = list_to_integer(A#employee.basesalary),
+    B_salary = list_to_integer(B#employee.salary),
+    B_base = list_to_integer(B#employee.basesalary),
+    (A_salary * 100) / A_base < (B_salary * 100) / B_base.
+
+
+equal_performance(A, B) ->
+    map(A#employee.performance) =:= map(B#employee.performance).
 
 
 compare_performance(A, B) ->
-    A#employee.performance >  B#employee.performance.
+    map(A#employee.performance) >  map(B#employee.performance).
+	     
 
 map(Performance) ->
     case Performance of
@@ -53,22 +81,12 @@ fill_employee_info(No, Name, Salary, Level, Basesalary, Performance) ->
 
 
 read_lines(FileName) ->    
-    case file:open(FileName, [read]) of
+    case file:read_file(FileName) of
 	{ok, Data} ->
-	    Lines = get_lines(Data, []),
-	    Strip_List = [string:strip(X, right, $\n) || X <- Lines],
-	    [string:tokens(X, "! ") || X <- Strip_List];
+	    Lines = string:tokens(binary:bin_to_list(Data), "\n"),
+	    [string:tokens(X, " ") || X <- Lines];
 	{error,Reason} ->
 	    {error,Reason}
     end.
-
-get_lines(Data, Acc) ->    
-    case io:get_line(Data, "") of
-        eof  ->
-	    file:close(Data),
-	    Acc;
-	Line ->
-	    get_lines(Data, Acc ++ [Line])
-    end.	      
 
 
