@@ -1,7 +1,7 @@
 -module(salary).
 -export([read_lines/1, fill_employee_info/6,
 	 record_of_all_employees/1, map/1,
-	 compare_performance/2, sort_employees/1]).
+	 compare_performance/2, sort_employees/1, calculate_compa_ratio/2]).
 
 -record(employee, {no,
                   name,
@@ -13,20 +13,19 @@
 
 sort_employees(File) ->
     Employees = record_of_all_employees(File),
-
-    lists:sort(
-      fun(A, B) -> map(A#employee.performance) >  map(B#employee.performance) end,
-      Employees).
-
+    
+    lists:sort(fun(A, B) -> compare_performance(A, B) end , Employees).
 
 calculate_compa_ratio(A, B) ->
-    A_compa_ratio = (A#employee.salary * 100) / A#employee.basesalary,
-    B_compa_ratio = (B#employee.salary * 100) / B#employee.basesalary,
-    A_compa_ratio > B_compa_ratio.
+    (string:to_integer(A#employee.salary) * 100) / 
+	string:to_integer(A#employee.basesalary) > 
+	(string:to_integer(B#employee.salary) * 100) / 
+	string:to_integer(B#employee.basesalary).
 
 
 compare_performance(A, B) ->
-    A#employee.performance >  B#employee.performance.
+    map(A#employee.performance) >  map(B#employee.performance).
+	     
 
 map(Performance) ->
     case Performance of
@@ -53,22 +52,12 @@ fill_employee_info(No, Name, Salary, Level, Basesalary, Performance) ->
 
 
 read_lines(FileName) ->    
-    case file:open(FileName, [read]) of
+    case file:read_file(FileName) of
 	{ok, Data} ->
-	    Lines = get_lines(Data, []),
-	    Strip_List = [string:strip(X, right, $\n) || X <- Lines],
-	    [string:tokens(X, "! ") || X <- Strip_List];
+	    Lines = string:tokens(binary:bin_to_list(Data), "\n"),
+	    [string:tokens(X, " ") || X <- Lines];
 	{error,Reason} ->
 	    {error,Reason}
     end.
-
-get_lines(Data, Acc) ->    
-    case io:get_line(Data, "") of
-        eof  ->
-	    file:close(Data),
-	    Acc;
-	Line ->
-	    get_lines(Data, Acc ++ [Line])
-    end.	      
 
 

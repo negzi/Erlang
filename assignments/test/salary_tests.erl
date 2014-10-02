@@ -35,15 +35,15 @@ compare_performance_test() ->
     A = #employee{no = "2",name = "albert",salary = "21161",
 	      level = "4",basesalary = "15000",performance = "Bad"},
     B = #employee{no = "4",name = "emilio",salary = "21562",
-		  level = "6",basesalary = "25000",performance = "Excellent"},
+		  level = "6",basesalary = "25000",performance = "Bad"},
     ?assertEqual(false, salary:compare_performance(A, B)).
 
 calculate_compa_ratio_test() ->
     A = #employee{no = "2",name = "albert",salary = "21161",
-		  level = "4",basesalary = "15000",performance = "Bad"},
+		  level = "4",basesalary = "15000",performance = "Good"},
     B = #employee{no = "4",name = "emilio",salary = "21562",
-		  level = "6",basesalary = "25000",performance = "Excellent"},
-    ?assertEqual(false, salary:compare_performance(A, B)).
+		  level = "6",basesalary = "25000",performance = "Bad"},
+    ?assertEqual(true, salary:compare_performance(A, B)).
     
 
 sorted_employees_test() ->
