@@ -14,13 +14,13 @@ sorted_list(File) ->
     Sorted_records = sort_employees(File),
     List = [record_value(Rec) || Rec <- Sorted_records],
     
-    file:write_file("Sorted_Employees", List).
-%    [write_to_file("Sorted_Employees", L) || L <-List].
+%    file:write_file("Sorted_Employees", List).
+    [write_to_file("/home/enegfaz/Sorted_Employees", L) || L <-List].
 %    write_to_file("Sorted_Employees", List).
 
 write_to_file(New_File, List) ->
-    file:write_file(New_File, io_lib
-		    :fwrite("~s ~s ~s ~s ~s ~s ~n", List)).
+    file:write_file(New_File, 
+		    io_lib:fwrite("~s ~s ~s ~s ~s ~s ~n", List), [append]).
 
 sort_employees(File) ->
     Employees = record_of_all_employees(File),
