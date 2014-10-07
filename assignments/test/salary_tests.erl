@@ -59,11 +59,3 @@ record_value_test() ->
     A = #employee{no = "2",name = "albert",salary = "21161",
 		  level = "4",basesalary = "15000",performance = "Good"},
     ?assertEqual(["2","albert","21161","4","15000","Good"], salary:record_value(A)).
-
-%%% is_sorted_file_created_test() ->
- %%    ?assertEqual(ok, 
- %% 		 salary:sorted_list("/home/enegfaz/employee_info")).
-
-result_file_exist_test() ->
-    salary:sorted_list("/home/enegfaz/employee_info"),
-    ?assertMatch({ok, _}, file:read_file("/home/enegfaz/Sorted_Employees")).

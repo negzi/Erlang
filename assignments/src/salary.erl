@@ -1,5 +1,5 @@
 -module(salary).
--export([read_lines/1, fill_employee_info/6,sorted_list/1,write_to_file/2,
+-export([read_lines/1, fill_employee_info/6,sorted_list/2,write_to_file/2,
 	 record_of_all_employees/1, map/1,sort_employees/1,record_value/1,
 	 compare_performance/2, sort_employees/1, calculate_compa_ratio/2]).
 
@@ -10,13 +10,10 @@
                   basesalary,
                   performance}).
 
-sorted_list(File) ->    
-    Sorted_records = sort_employees(File),
+sorted_list(Source_File, Dest_File) ->    
+    Sorted_records = sort_employees(Source_File),
     List = [record_value(Rec) || Rec <- Sorted_records],
-    
-%    file:write_file("Sorted_Employees", List).
-    [write_to_file("/home/enegfaz/Sorted_Employees", L) || L <-List].
-%    write_to_file("Sorted_Employees", List).
+    [write_to_file(Dest_File, L) || L <-List].
 
 write_to_file(New_File, List) ->
     file:write_file(New_File, 
