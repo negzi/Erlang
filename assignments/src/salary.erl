@@ -1,8 +1,5 @@
 -module(salary).
--export([read_lines/1, fill_employee_info/6,sorted_list/2,write_to_file/2,
-	 record_of_all_employees/1, map/1,sort_employees/1,record_value/1,
-	 compare_performance/2, sort_employees/1, calculate_compa_ratio/2]).
-
+-compile([debug_info, export_all]).
 -record(employee, {no,
                   name,
                   salary,
