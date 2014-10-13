@@ -1,0 +1,18 @@
+Assignment 3
+----------------------------------------------------------------------------
+Phase 1:
+----------------------------------------------------------------------------
+Implement a system that
+- Clients can connect to this system using TCP sockets
+- Each client can send a command to this system using TCP sockets
+- System will perform that command and reply to the client using TCP sockets.
+  - Server will reply with an ERROR if:
+    - The command format is not "$MODULE $FUNCTION $ARGUMENTS".
+      And ERROR will be {error, wrong_command_format}
+    - The $MODULE:FUNCTION($ARGUMENTS) does not exist
+      And ERROR will be {error, command_does_not_exist}
+
+$MODULE <- [assignment_1, salary]
+$FUNCTION is any interface function in the given modules.
+
+Use GIT for version control and TDD as usual.
