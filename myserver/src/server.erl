@@ -16,34 +16,42 @@ accept(ListenSocket) ->
     accept(ListenSocket).
 
 loop(Socket) ->
+    dbg:tracer(),
+    dbg:p(all,[c]),
+    dbg:tpl(gen_tcp,x),
+    dbg:tpl(server,x),
     case gen_tcp:recv(Socket, 0) of
-        {ok, Data} ->    
+        {ok, Data} ->
             io:format("Recieved: ~s~n", [Data]),
-	    gen_tcp:send(Socket, [Data]),
+	    Result = execute_command(Data),
+	    gen_tcp:send(Socket, [Result]),
 	    loop(Socket);
-	        {error, closed} ->
+	{error, closed} ->
             ok
     end.
 
 execute_command(Data) ->
-    [Module, Function| Args] = parse_command(Data),
-    Mod = list_to_atom(Module),
-    Fun =list_to_atom(Function),
-    func_specific_executaor(Fun , Mod, Args).
-    %Mod:Fun(Args).
-        
+    case is_list(Data) of
+	true ->
+	    {ok, [Mod, Fun| Args]} = parse_command(Data), 
+		func_specific_executaor(Fun , Mod, Args);
+	false ->
+	    {error, wrong_command_format}
+    end.
+
 parse_command(Data) ->
-    string:tokens(Data, " ").
+    Striped = Data--"\"\"\"",
+    [Module, Function| Args] =  string:tokens(Striped, ",[]\n "),
+    [Mod, Fun] = [list_to_atom(X) ||
+		     X <- [Module, Function]],
+    {ok, [Mod, Fun |Args]}.
 
 func_specific_executaor(palindrome, Module, Args) ->
     Module:palindrome(Args);
 func_specific_executaor(sorted_list, Module, Args) ->
     [Src_file, Res_file] = Args,
-    Module:sorted_list(Src_file, Res_file).
-
-
-
-
-%func_specific_executaor() ->
-
+    Module:sorted_list(Src_file, Res_file);
+func_specific_executaor(math, Module, Args) ->
+    Arguments = [list_to_integer(X) || X <- Args],
+    Module:math(Arguments).
     
