@@ -24,7 +24,8 @@ loop(Socket) ->
         {ok, Data} ->
             io:format("Recieved: ~s~n", [Data]),
 	    Result = execute_command(Data),
-	    gen_tcp:send(Socket, [Result]),
+	    gen_tcp:send(Socket, Result),
+	    gen_tcp:close(Socket),
 	    loop(Socket);
 	{error, closed} ->
             ok
@@ -33,7 +34,7 @@ loop(Socket) ->
 execute_command(Data) ->
     case is_list(Data) of
 	true ->
-	    {ok, [Mod, Fun| Args]} = parse_command(Data), 
+	    {ok, [Mod, Fun |Args]} = parse_command(Data), 
 		func_specific_executaor(Fun , Mod, Args);
 	false ->
 	    {error, wrong_command_format}
@@ -53,5 +54,6 @@ func_specific_executaor(sorted_list, Module, Args) ->
     Module:sorted_list(Src_file, Res_file);
 func_specific_executaor(math, Module, Args) ->
     Arguments = [list_to_integer(X) || X <- Args],
-    Module:math(Arguments).
+    {A, B} = Module:math(Arguments),
+    [A, B].
     
