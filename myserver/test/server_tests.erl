@@ -16,23 +16,22 @@ palindrome_command_test() ->
     ?assertEqual(["ses"], server:execute_command(Data)).
 
 salary_command_test() ->
-    Data = "salary sorted_list /home/neg/em_file /home/neg/sortedf",
-        ?assertEqual([ok,ok,ok], server:execute_command(Data)).
+    Data = 
+	"salary sorted_list /home/enegfaz/employee_info /home/enegfaz/sortedf",
+    ?assertEqual([[91,["ok",44,"ok",44,"ok"],93]], 
+		 server:execute_command(Data)).
 
 math_command_test() ->
-    Data = "assignment_1 math [1 2 3 4]",
-    ?assertEqual({4, 8}, server:execute_command(Data)).
+    Data = "assignment_1 math 1 2 3 4",
+    ?assertEqual([[123,["4",44,"8"],125]], server:execute_command(Data)).
+
+
+math2_command_test() ->
+    Data = "assignment_1 math 1 2 3 a",
+    ?assertEqual([[123,["error",44,"wrong_command_format"],125]],
+		 server:execute_command(Data)).
 
 wrong_format_test() ->
     Data = 1,
     ?assertEqual({error, wrong_command_format},
-		 server:execute_command(Data)).
-
-    
-%% wrong_format2_test() ->
-%%     dbg:tracer(),
-%%     dbg:p(all, [c]),
-%%     dbg:tpl(server, x),
-%%     Data = [1],
-%%     ?assertEqual({error, wrong_command_format},
-%%                  server:execute_command(Data)).
+		 server:verify_input(Data)).

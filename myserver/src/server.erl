@@ -4,6 +4,7 @@
 
 -define(TCP_OPTIONS, [list, {packet, 0}, 
 		      {active, false}, {reuseaddr, true}]).
+-define(ERROR, {error, wrong_command_format}).
 
 start(Port) ->     
     {ok, ListenSocket} = gen_tcp:listen(Port, ?TCP_OPTIONS),
@@ -11,34 +12,45 @@ start(Port) ->
 
 accept(ListenSocket) ->
     {ok, Socket} = gen_tcp:accept(ListenSocket),
-    spawn(fun() ->
-		  loop(Socket) end),
+    spawn(fun() -> loop(Socket) end),
     accept(ListenSocket).
 
 loop(Socket) ->
-    dbg:tracer(),
-    dbg:p(all,[c]),
-    dbg:tpl(gen_tcp,x),
-    dbg:tpl(server,x),
     case gen_tcp:recv(Socket, 0) of
         {ok, Data} ->
-            io:format("Recieved: ~s~n", [Data]),
-	    Result = execute_command(Data),
-	    gen_tcp:send(Socket, Result),
-	    gen_tcp:close(Socket),
-	    loop(Socket);
+	    verify_and_send(Data, Socket);
 	{error, closed} ->
-            ok
+	    ok
     end.
 
-execute_command(Data) ->
-    case is_list(Data) of
+verify_and_send(Data, Socket) ->
+    case verify_input(Data) of
 	true ->
-	    {ok, [Mod, Fun |Args]} = parse_command(Data), 
-		func_specific_executaor(Fun , Mod, Args);
-	false ->
-	    {error, wrong_command_format}
+	    Result = execute_command(Data),		   
+	    gen_tcp:send(Socket, [Result]),
+	    loop(Socket);
+	{error, Reason} ->
+	    gen_tcp:send(Socket, format(Reason)),
+	    loop(Socket)
     end.
+
+verify_input(Data) ->
+    case is_list(Data) of
+	true -> 
+	    case string:words(Data) >= 3 of
+		true ->
+		    true;
+	    false ->
+		    ?ERROR
+	    end;
+	false ->
+	    ?ERROR
+    end.
+
+
+execute_command(Data) ->
+    {ok, [Mod, Fun |Args]} = parse_command(Data), 
+    func_specific_executaor(Fun , Mod, Args).
 
 parse_command(Data) ->
     Striped = Data--"\"\"\"",
@@ -51,9 +63,22 @@ func_specific_executaor(palindrome, Module, Args) ->
     Module:palindrome(Args);
 func_specific_executaor(sorted_list, Module, Args) ->
     [Src_file, Res_file] = Args,
-    Module:sorted_list(Src_file, Res_file);
+    Res = Module:sorted_list(Src_file, Res_file),
+    format(Res);
 func_specific_executaor(math, Module, Args) ->
-    Arguments = [list_to_integer(X) || X <- Args],
-    {A, B} = Module:math(Arguments),
-    [A, B].
+    case are_none_integers(Args) of
+	true ->
+	    format(?ERROR);
+	false ->
+	    Arguments = [list_to_integer(X) || X <- Args],
+	    Res = Module:math(Arguments),
+	    format(Res)
+    end.
+
+format(Data) ->
+    io_lib:format("~w", [Data]).
+
+are_none_integers(Args) ->
+    List = [io_lib:fread("~d", X) || X <- Args],
+    proplists:is_defined(error, List).
     
