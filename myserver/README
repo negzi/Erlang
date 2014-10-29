@@ -16,3 +16,13 @@ $MODULE <- [assignment_1, salary]
 $FUNCTION is any interface function in the given modules.
 
 Use GIT for version control and TDD as usual.
+
+----------------------------------------------------------------------------
+Phase 2:
+----------------------------------------------------------------------------
+Each client can request command history.
+Server should keep track of what has been done for each client
+and reply with the command history.
+
+MSG = "history"
+REPLY = "math funtion is executed" | "command_does_not_exist" | ..

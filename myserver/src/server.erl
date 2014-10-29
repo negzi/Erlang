@@ -5,6 +5,7 @@
 -define(TCP_OPTIONS, [list, {packet, 0}, 
 		      {active, false}, {reuseaddr, true}]).
 -define(ERROR, {error, wrong_command_format}).
+-define(UNDEFCOMMAND, {error,command_does_not_exist}).
 
 start(Port) ->     
     {ok, ListenSocket} = gen_tcp:listen(Port, ?TCP_OPTIONS),
@@ -24,15 +25,18 @@ loop(Socket) ->
     end.
 
 verify_and_send(Data, Socket) ->
-    case verify_input(Data) of
-	true ->
-	    Result = execute_command(Data),		   
-	    gen_tcp:send(Socket, [Result]),
-	    loop(Socket);
-	{error, Reason} ->
-	    gen_tcp:send(Socket, format(Reason)),
-	    loop(Socket)
-    end.
+    Res = case verify_input(Data) of
+	      true ->
+		  Result = execute_command(Data),
+		  [Result];
+	      {error, Reason} ->
+		  format(Reason)
+	  end,
+    send(Socket,Res).
+
+send(Soc, Res) ->
+    gen_tcp:send(Soc, Res),
+    loop(Soc).
 
 verify_input(Data) ->
     case is_list(Data) of
@@ -45,12 +49,23 @@ verify_input(Data) ->
 	    end;
 	false ->
 	    ?ERROR
-    end.
-
+    end.    
 
 execute_command(Data) ->
-    {ok, [Mod, Fun |Args]} = parse_command(Data), 
-    func_specific_executaor(Fun , Mod, Args).
+    {ok, [Mod, Fun |Args]} = parse_command(Data),
+    case module_is_defined(Mod) of
+	true ->
+	    func_specific_executaor(Fun , Mod, Args);
+	 false ->
+	    format(?UNDEFCOMMAND)
+    end.
+
+module_is_defined(assignment_1) ->
+    true;
+module_is_defined(salary) ->
+    true;
+module_is_defined(_) ->
+    false.
 
 parse_command(Data) ->
     Striped = Data--"\"\"\"",
@@ -73,7 +88,9 @@ func_specific_executaor(math, Module, Args) ->
 	    Arguments = [list_to_integer(X) || X <- Args],
 	    Res = Module:math(Arguments),
 	    format(Res)
-    end.
+    end;
+func_specific_executaor(_, _, _) ->
+    format(?UNDEFCOMMAND).
 
 format(Data) ->
     io_lib:format("~w", [Data]).

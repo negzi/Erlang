@@ -35,3 +35,8 @@ wrong_format_test() ->
     Data = 1,
     ?assertEqual({error, wrong_command_format},
 		 server:verify_input(Data)).
+
+unknown_module_test() ->
+    Data = "assignment math 1 2 3 4",
+    ?assertEqual([[123,["error",44,"command_does_not_exist"],125]], 
+       server:execute_command(Data)).
