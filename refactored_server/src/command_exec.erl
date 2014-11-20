@@ -1,9 +1,9 @@
 -module(command_exec).
 -compile(export_all).
 
-exec_command(history,_, _, Socket) ->
+exec(history,_, _, Socket) ->
     return_history(Socket);
-exec_command(Mod, Fun, Args, _) ->
+exec(Mod, Fun, Args, _) ->
     command_matcher(Mod, Fun, Args).
 
 command_matcher(palindrome, Mod, Args) ->
