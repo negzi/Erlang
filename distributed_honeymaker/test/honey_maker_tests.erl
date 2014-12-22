@@ -2,7 +2,5 @@
 -include_lib("eunit/include/eunit.hrl").
 
 create_md5_test() ->
-    File = "/home/enegfaz/learnings/erlang_assignments/Erlang/Erlang/distributed_honeymaker/myfile",
-    Hash = "3b8d2ee0a5172e97c05952c5eb3154d1",
-    ?assertEqual({ok, Hash}, honey_maker:open(File)).
-
+    File = "/home/neg/myfile",
+    ?assertEqual(ok, honey_maker:generate_md5(File, node())).

@@ -4,6 +4,8 @@
 -record(state, {queen_id,
                 hive_id,
 		node_name}).
+-define(TOPDIR, "/home/neg/Erlang/distributed_honeymaker").
+
 
 start(File) ->
     register(?MODULE, Pid=spawn(?MODULE, init, [File])),
@@ -26,22 +28,24 @@ loop(S = #state{}) ->
     receive
         {From, Ref, destroy} ->
 	    Q = hive:get_queen_id(),
-            From ! {Ref, ok, S#state{queen_id = Q}};
+	    From ! {Ref, ok, S#state{queen_id = Q}},
+	    loop(S);
 	{From, Ref, shutdown}->
 	    exit(hive, shutdown);
 	{From, Ref, identify_your_self} ->
 	    From ! {}
     end.
 
+
 honey_maker_bee(File) ->
-    honey_maker:open(File).
+    honey_maker:generate_md5(File, node()).
 
 communicator_bee() ->
+    OtherNode= file_search:return_node_name(?TOPDIR),
     S = #state{},
     Ref = S#state.hive_id,
     MyNode =  S#state.node_name,
-%    net_kernel:connect_node(),
-    {Ref, MyNode}.
+    {Ref, MyNode, OtherNode}.
 
 get_hives_node() ->
     node().
