@@ -7,16 +7,16 @@
 -define(TOPDIR, "/home/neg/Erlang/distributed_honeymaker").
 
 
-start(File) ->
+start_hive(File) ->
     register(?MODULE, Pid=spawn(?MODULE, init, [File])),
-    Pid.
+    {ok, Pid}.
 
 start_link() ->
     register(?MODULE, Pid=spawn_link(?MODULE, init, [])),
-    Pid.
+    {ok, Pid}.
 
 terminate() ->
-    ?MODULE ! shutdown.
+    ?MODULE ! {shutdown}.
 
 init(File) ->
     spawn(?MODULE, honey_maker_bee, [File]),
@@ -26,16 +26,15 @@ init(File) ->
 
 loop(S = #state{}) ->
     receive
-        {From, Ref, destroy} ->
-	    Q = hive:get_queen_id(),
-	    From ! {Ref, ok, S#state{queen_id = Q}},
+        {From, identify_your_self} ->
+	    From ! {?MODULE,S},
 	    loop(S);
-	{From, Ref, shutdown}->
-	    exit(hive, shutdown);
-	{From, Ref, identify_your_self} ->
-	    From ! {}
+	{shutdown}->
+	    exit(?MODULE, kill)
     end.
 
+identify_your_self(From) ->
+    ?MODULE ! {From, identify_your_self}.
 
 honey_maker_bee(File) ->
     honey_maker:generate_md5(File, node()).
